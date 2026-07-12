@@ -11,7 +11,7 @@ TOKEN = "7628985380:AAGzyblkfL_QMmvY8L9jm_XiODajRm10xvU"
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 
 # Состояния для анкеты (этапы разговора)
-NAME, PHONE, REQUEST = range(3)
+NAME, SOURCE, PHONE, TIME, REQUEST = range(5)
 
 # 🔽 СЮДА ВСТАВЬТЕ ID МЕНЕДЖЕРА (узнайте через @userinfobot в Telegram)
 MANAGER_CHAT_ID = 8335114889
@@ -23,6 +23,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     return NAME
 
+async def ask_source(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Сохраняем время, спрашиваем откуда узнали"""
+    context.user_data['time'] = update.message.text
+    await update.message.reply_text(
+        "Откуда вы узнали о нас? (например: 'из Instagram', 'от друзей', 'через поисковик')"
+    )
+    return SOURCE
+
 async def ask_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['name'] = update.message.text
     await update.message.reply_text(
@@ -30,6 +38,14 @@ async def ask_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Укажите ваш номер телефона:"
     )
     return PHONE
+
+async def ask_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Сохраняем суть запроса, спрашиваем удобное время"""
+    context.user_data['request'] = update.message.text
+    await update.message.reply_text(
+        "В какое время вам удобно связаться? (например: 'с 10 до 12' или 'после 18:00')"
+    )
+    return TIME
 
 async def ask_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['phone'] = update.message.text
@@ -44,8 +60,10 @@ async def finalize(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lead = (
         f"📩 НОВАЯ ЗАЯВКА!\n"
         f"Имя: {context.user_data['name']}\n"
+        f"*Откуда узнали:* {context.user_data['source']}"
         f"Телефон: {context.user_data['phone']}\n"
         f"Запрос: {context.user_data['request']}"
+        f"*Удобное время:* {context.user_data['time']}\n"
     )
 
     await context.bot.send_message(chat_id=MANAGER_CHAT_ID, text=lead)
@@ -63,7 +81,9 @@ conv_handler = ConversationHandler(
     entry_points=[CommandHandler('start', start)],
     states={
         NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_name)],
+        SOURCE: [MessageHandler(filters.TEXT & ~filters.COMMAND, finalize)],
         PHONE: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_phone)],
+        TIME: [MessageHandler(filters.TEXT & ~filters.COMMAND, ask_source)],
         REQUEST: [MessageHandler(filters.TEXT & ~filters.COMMAND, finalize)],
     },
     fallbacks=[CommandHandler('cancel', cancel)],
