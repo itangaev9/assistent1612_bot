@@ -24,7 +24,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return NAME
 
 async def ask_source(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Сохраняем время, спрашиваем откуда узнали"""
     context.user_data['time'] = update.message.text
     await update.message.reply_text(
         "Откуда вы узнали о нас? (например: 'из Instagram', 'от друзей', 'через поисковик')"
@@ -40,7 +39,6 @@ async def ask_name(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return PHONE
 
 async def ask_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Сохраняем суть запроса, спрашиваем удобное время"""
     context.user_data['request'] = update.message.text
     await update.message.reply_text(
         "В какое время вам удобно связаться? (например: 'с 10 до 12' или 'после 18:00')"
