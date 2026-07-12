@@ -58,10 +58,10 @@ async def finalize(update: Update, context: ContextTypes.DEFAULT_TYPE):
     lead = (
         f"📩 НОВАЯ ЗАЯВКА!\n"
         f"Имя: {context.user_data['name']}\n"
-        f"*Откуда узнали:* {context.user_data['source']}"
+        f"*Откуда узнали:* {context.user_data.get['source', 'Не указано']}"
         f"Телефон: {context.user_data['phone']}\n"
         f"Запрос: {context.user_data['request']}"
-        f"*Удобное время:* {context.user_data['time']}\n"
+        f"*Удобное время:* {context.user_data.get['time', 'Не указано']}\n"
     )
 
     await context.bot.send_message(chat_id=MANAGER_CHAT_ID, text=lead)
